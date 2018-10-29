@@ -3,27 +3,27 @@ class Worklist:
         self.program, self.flow, self.nodes, self.variables = program, program.flow(), program.nodeList(), program.variables()
 
     def computeSolution(self):
-        w, input, output = self.flow.copy(), {}, {}
+        w, in_sets, out_sets = self.flow.copy(), {}, {}
 
         for node in self.nodes:
             l = node.init
-            input[l] = self.base_value if l in self.base_set else set()
+            in_sets[l] = self.base_value if l in self.base_set else set()
 
         while w:
             el = w.pop()
             l, lp = el[0], el[1]
-            out = (input[l] - self.nodes[l-1].kill) | self.nodes[l-1].gen
+            out = (in_sets[l] - self.nodes[l-1].kill) | self.nodes[l-1].gen
 
-            if not out <= input[lp]:
-                input[lp] = self.join_func(input[lp], out)
+            if not out <= in_sets[lp]:
+                in_sets[lp] = self.join_func(in_sets[lp], out)
 
                 for s in self.flow:
                     if lp == s[0]:
                         w = w | {s}
-        for i in input:
-            output[i] = (input[i] - self.nodes[i-1].kill) | self.nodes[i-1].gen
+        for i in in_sets:
+            out_sets[i] = (in_sets[i] - self.nodes[i-1].kill) | self.nodes[i-1].gen
 
-        return input, output
+        return in_sets, out_sets
 
 
 class ReachingDefinitionsWorklist(Worklist):
