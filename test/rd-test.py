@@ -29,31 +29,33 @@ class TestReachingDefinitions(unittest.TestCase):
 
         self.program = microc.microc.McProgram(nodes)
         self.analyzer = ReachingDefinitionsAnalyzer()
-        self.worklist = ReachingDefinitionsWorklist()
+        self.worklist = ReachingDefinitionsWorklist(self.program)
 
-    def test_analyzer(self):
-        self.analyzer.analyzeProgram(self.program)
+    def testAnalyzer(self):
+        self.analyzer.analyze(self.program)
         expected_variables = {"x", "y"}
         self.assertEqual(self.program.variables(), expected_variables)
-        nodes = self.program.nodes()
+        nodes = self.program.nodeList()
         self.assertEqual(len(nodes), 6)
         # Check kill and gen sets
-        self.assertEqual(nodes[0]._gen, {('x', 1)})
-        self.assertEqual(nodes[0]._kill, {('x', '?'), ('x', 1), ('x', 5), ('x', 6)})
-        self.assertEqual(nodes[1]._gen, {('y', 2)})
-        self.assertEqual(nodes[1]._kill, {('y', '?'), ('y', 2), ('y', 4)})
-        self.assertEqual(nodes[2]._gen, set())
-        self.assertEqual(nodes[2]._kill, set())
-        self.assertEqual(nodes[3]._gen, {('y', 4)})
-        self.assertEqual(nodes[3]._kill, {('y', '?'), ('y', 2), ('y', 4)})
-        self.assertEqual(nodes[4]._gen, {('x', 5)})
-        self.assertEqual(nodes[4]._kill, {('x', '?'), ('x', 1), ('x', 5), ('x', 6)})
-        self.assertEqual(nodes[5]._gen, {('x', 6)})
-        self.assertEqual(nodes[5]._kill, {('x', '?'), ('x', 1), ('x', 5), ('x', 6)})
+        self.assertEqual(nodes[0].gen, {('x', 1)})
+        self.assertEqual(nodes[0].kill, {('x', '?'), ('x', 1), ('x', 5), ('x', 6)})
+        self.assertEqual(nodes[1].gen, {('y', 2)})
+        self.assertEqual(nodes[1].kill, {('y', '?'), ('y', 2), ('y', 4)})
+        self.assertEqual(nodes[2].gen, set())
+        self.assertEqual(nodes[2].kill, set())
+        self.assertEqual(nodes[3].gen, {('y', 4)})
+        self.assertEqual(nodes[3].kill, {('y', '?'), ('y', 2), ('y', 4)})
+        self.assertEqual(nodes[4].gen, {('x', 5)})
+        self.assertEqual(nodes[4].kill, {('x', '?'), ('x', 1), ('x', 5), ('x', 6)})
+        self.assertEqual(nodes[5].gen, {('x', 6)})
+        self.assertEqual(nodes[5].kill, {('x', '?'), ('x', 1), ('x', 5), ('x', 6)})
 
-    def test_worklist(self):
-        # TODO: implement
-        pass
+    def testWorklist(self):
+        self.analyzer.analyze(self.program)
+        rd_in, rd_out = self.worklist.computeSolution()
+        # Check the output from the last node is correct.
+        self.assertEqual(rd_out[6], {('x', 6), ('y', 4), ('y', 2)})
 
 
 if __name__ == '__main__':

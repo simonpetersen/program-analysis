@@ -1,5 +1,4 @@
 from analysis.worklist import ReachingDefinitionsWorklist
-from analysis.worklist import LiveVariablesWorklist
 from analysis.analyzer import ReachingDefinitionsAnalyzer
 import microc.expressions
 import microc.statements
@@ -36,8 +35,7 @@ program = microc.microc.McProgram(nodes)
 analyzer = ReachingDefinitionsAnalyzer()
 analyzer.analyze(program)
 
-#wl = ReachingDefinitionsWorklist(program)
-wl = LiveVariablesWorklist(program)
+wl = ReachingDefinitionsWorklist(program)
 rd_in, rd_out = wl.computeSolution()
 
 for rd in rd_in:
