@@ -40,5 +40,5 @@ class LiveVariablesWorklist(Worklist):
         self.base_set = set(self.program.nodes[-1].final)
         self.base_value = self.variables
         self.join_func = lambda in_set, out_set: in_set | out_set
-        reversed_flow = set(map(lambda l: (l[1], l[0]), self.flow))
-        self.flow = self.flow | reversed_flow
+        # Flow-edges should be reversed, because of backward analysis
+        self.flow = set(map(lambda l: (l[1], l[0]), self.flow))
