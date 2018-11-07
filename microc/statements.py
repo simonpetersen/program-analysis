@@ -62,7 +62,7 @@ class McIfStatement(McNode):
 
 class McIfElseStatement(McNode):
     def __init__(self, l, condition, thenBody, elseBody):
-        super(McIfStatement, self).__init__(l)
+        super(McIfElseStatement, self).__init__(l)
         self.condition, self.thenBody, self.elseBody, self.body = condition, thenBody, elseBody, thenBody + elseBody
         if len(self.thenBody) > 0:
             self.final = [self.thenBody[-1].init]
@@ -102,3 +102,21 @@ class McIfElseStatement(McNode):
 class McAssignment(McBinaryExpression):
     def __init__(self, l, lhs, rhs):
         super(McAssignment, self).__init__(l, lhs, rhs)
+
+
+class McReadStatement(McNode):
+    def __init__(self, l, variable):
+        super(McReadStatement, self).__init__(l)
+        self.variable = variable
+
+    def variables(self):
+        return self.variable.variables()
+
+
+class McWriteStatement(McNode):
+    def __init__(self, l, statement):
+        super(McWriteStatement, self).__init__(l)
+        self.statement = statement
+
+    def variables(self):
+        return self.statement.variables()
