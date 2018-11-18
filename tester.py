@@ -1,4 +1,3 @@
-from analysis.worklist import ReachingDefinitionsWorklist
 from analysis.analyzer import ReachingDefinitionsAnalyzer
 import microc.expressions
 import microc.statements
@@ -33,15 +32,11 @@ nodes.append(microc.statements.McAssignment(6, x, microc.expressions.McValueLite
 program = microc.microc.McProgram(nodes)
 
 analyzer = ReachingDefinitionsAnalyzer()
-analyzer.analyze(program)
+constraints = analyzer.analyze(program)
 
-wl = ReachingDefinitionsWorklist(program)
-rd_in, rd_out = wl.computeSolution()
+for c in constraints:
+    print(c)
 
-for rd in rd_in:
-    print(rd, rd_in[rd])
-
-print()
-
-for rd in rd_out:
-    print(rd, rd_out[rd])
+# Should be changed when Worklist is implemented.
+#wl = ReachingDefinitionsWorklist(program)
+#rd_in, rd_out = wl.computeSolution()

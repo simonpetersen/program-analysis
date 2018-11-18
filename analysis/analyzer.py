@@ -1,4 +1,7 @@
 from microc.statements import McAssignment
+from analysis.data import Constraint
+from analysis.data import PostActionSet
+from analysis.data import PostActionKillGen
 
 
 class ReachingDefinitionsAnalyzer:
@@ -18,8 +21,33 @@ class ReachingDefinitionsAnalyzer:
                 gen = {(variable, node.init)}
                 node.kill, node.gen = kill, gen
 
+        return nodes
+
+    def constructConstraints(self, nodes, variables, flow):
+        constraints = []
+        for node in nodes:
+            l = node.init
+            if l == 1:
+                base_set = set(map(lambda l: (l[0], '?'), variables))
+                c = Constraint(l, [PostActionSet(l, base_set)])
+                constraints.append(c)
+            else:
+                input = []
+                conn_nodes = filter(lambda f: f[1] == l, flow)
+                for n in conn_nodes:
+                    i = n[0]
+                    s = PostActionKillGen(i, nodes[i-1].kill, nodes[i-1].gen)
+                    input.append(s)
+                c = Constraint(l, input)
+                constraints.append(c)
+
+        return constraints
+
     def analyze(self, program):
         nodes = program.nodeList()
+        variables = program.variables()
+        flow = program.flow()
         assignments = self.assignments(nodes, set())
 
-        self.setKillGenSets(nodes, assignments)
+        nodes = self.setKillGenSets(nodes, assignments)
+        return self.constructConstraints(nodes, variables, flow)

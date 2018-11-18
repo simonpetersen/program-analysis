@@ -1,44 +1,45 @@
-class Worklist:
+from analysis.data import Constraint
+
+class WorklistBase:
     def __init__(self, program):
         self.program, self.flow, self.nodes, self.variables = program, program.flow(), program.nodeList(), program.variables()
 
-    def computeSolution(self):
-        w, in_sets, out_sets = self.flow.copy(), {}, {}
+    def computeSolution(self, constraints):
+        w, analysis, infl = [], [], []
 
-        for node in self.nodes:
-            l = node.init
-            in_sets[l] = self.base_value if l in self.base_set else set()
+        for c in constraints:
+            w = self.insert(c, w)
+            analysis.append(set())
+            infl.append(set())
 
-        while w:
-            el = w.pop()
-            l, lp = el[0], el[1]
-            out = (in_sets[l] - self.nodes[l-1].kill) | self.nodes[l-1].gen
+        # TODO: Make data structure for constraints.
+        #for c in constraints:
+            #for x in fv(rhs):
+                #infl[x] = infl[x] | c
 
-            if not out <= in_sets[lp]:
-                in_sets[lp] = self.join_func(in_sets[lp], out)
+        while w != self.equal:
+            c, w = self.extract(w)
+            # TODO: Set new
+            new = set()
+            if not analysis[c] >= new:
+                analysis[c.x-1] = analysis[c.x-1] | new
+                for cp in infl[c]:
+                    w = self.insert(cp, w)
 
-                for s in self.flow:
-                    if lp == s[0]:
-                        w = w | {s}
-        for i in in_sets:
-            out_sets[i] = (in_sets[i] - self.nodes[i-1].kill) | self.nodes[i-1].gen
-
-        return in_sets, out_sets
-
-
-class ReachingDefinitionsWorklist(Worklist):
-    def __init__(self, program):
-        super(ReachingDefinitionsWorklist, self).__init__(program)
-        self.base_set = {1}
-        self.base_value = set(map(lambda l: (l[0],'?'), self.variables))
-        self.join_func = lambda in_set, out_set: in_set | out_set
+        return analysis
 
 
-class LiveVariablesWorklist(Worklist):
-    def __init__(self, program):
-        super(LiveVariablesWorklist, self).__init__(program)
-        self.base_set = set(self.program.nodes[-1].final)
-        self.base_value = self.variables
-        self.join_func = lambda in_set, out_set: in_set | out_set
-        # Flow-edges should be reversed, because of backward analysis
-        self.flow = set(map(lambda l: (l[1], l[0]), self.flow))
+class WorklistChaotic(WorklistBase):
+    def __init__(self):
+        self.empty = []
+
+    def insert(self, c, w):
+        w.append(c)
+        return list(set(w))
+
+    def extract(self, w):
+        c = w.pop(0)
+        return c, w
+
+
+
