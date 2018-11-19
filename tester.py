@@ -1,4 +1,7 @@
 from analysis.analyzer import ReachingDefinitionsAnalyzer
+from analysis.worklist import WorklistChaotic
+from analysis.worklist import WorklistFifo
+from analysis.worklist import WorklistLifo
 import microc.expressions
 import microc.statements
 import microc.microc
@@ -34,9 +37,8 @@ program = microc.microc.McProgram(nodes)
 analyzer = ReachingDefinitionsAnalyzer()
 constraints = analyzer.analyze(program)
 
-for c in constraints:
-    print(c)
+wl = WorklistChaotic()
+solution = wl.computeSolution(constraints)
 
-# Should be changed when Worklist is implemented.
-#wl = ReachingDefinitionsWorklist(program)
-#rd_in, rd_out = wl.computeSolution()
+for s in solution:
+    print(s)

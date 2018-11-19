@@ -1,8 +1,6 @@
-from analysis.data import Constraint
-
 class WorklistBase:
-    def __init__(self, program):
-        self.program, self.flow, self.nodes, self.variables = program, program.flow(), program.nodeList(), program.variables()
+    def __init__(self):
+        self.empty = []
 
     def computeSolution(self, constraints):
         w, analysis, infl = [], [], []
@@ -12,27 +10,29 @@ class WorklistBase:
             analysis.append(set())
             infl.append(set())
 
-        # TODO: Make data structure for constraints.
-        #for c in constraints:
-            #for x in fv(rhs):
-                #infl[x] = infl[x] | c
+        for c in constraints:
+            for x in c.t:
+                infl[x.i-1] = infl[x.i-1] | {c}
 
-        while w != self.equal:
+        while w != self.empty:
             c, w = self.extract(w)
-            # TODO: Set new
-            new = set()
-            if not analysis[c] >= new:
+            new = self.eval(c, analysis)
+            if not analysis[c.x-1] >= new:
                 analysis[c.x-1] = analysis[c.x-1] | new
-                for cp in infl[c]:
+                for cp in infl[c.x-1]:
                     w = self.insert(cp, w)
 
         return analysis
 
+    def eval(self, constraint, analysis):
+        new = set()
+        for s in constraint.t:
+            result = s.result(analysis[s.i-1])
+            new = constraint.func(result, new)
+        return new
+
 
 class WorklistChaotic(WorklistBase):
-    def __init__(self):
-        self.empty = []
-
     def insert(self, c, w):
         w.append(c)
         return list(set(w))
@@ -40,6 +40,26 @@ class WorklistChaotic(WorklistBase):
     def extract(self, w):
         c = w.pop(0)
         return c, w
+
+
+class WorklistFifo(WorklistBase):
+    def insert(self, c, w):
+        w.append(c)
+        return w
+
+    def extract(self, w):
+        c = w[0]
+        return c, w[1:]
+
+
+class WorklistLifo(WorklistBase):
+    def insert(self, c, w):
+        w.append(c)
+        return w
+
+    def extract(self, w):
+        c = w[-1]
+        return c, w[:-1]
 
 
 

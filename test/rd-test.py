@@ -4,7 +4,7 @@ import microc.statements
 import microc.microc
 import microc.operations
 from analysis.analyzer import ReachingDefinitionsAnalyzer
-from analysis.worklist import ReachingDefinitionsWorklist
+from analysis.worklist import WorklistChaotic
 
 
 class TestReachingDefinitions(unittest.TestCase):
@@ -29,7 +29,6 @@ class TestReachingDefinitions(unittest.TestCase):
 
         self.program = microc.microc.McProgram(nodes)
         self.analyzer = ReachingDefinitionsAnalyzer()
-        self.worklist = ReachingDefinitionsWorklist(self.program)
 
     def testAnalyzer(self):
         self.analyzer.analyze(self.program)
@@ -52,10 +51,11 @@ class TestReachingDefinitions(unittest.TestCase):
         self.assertEqual(nodes[5].kill, {('x', '?'), ('x', 1), ('x', 5), ('x', 6)})
 
     def testWorklist(self):
-        self.analyzer.analyze(self.program)
-        rd_in, rd_out = self.worklist.computeSolution()
+        constraints = self.analyzer.analyze(self.program)
+        worklist = WorklistChaotic()
+        solution = worklist.computeSolution(constraints)
         # Check the output from the last node is correct.
-        self.assertEqual(rd_out[6], {('x', 6), ('y', 4), ('y', 2)})
+        self.assertEqual(solution[5], {('x', 5), ('y', 4), ('y', 2), ('x', 1)})
 
 
 if __name__ == '__main__':
