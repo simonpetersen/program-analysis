@@ -35,9 +35,9 @@ class McWhileStatement(McNode):
 class McIfStatement(McNode):
     def __init__(self, l, condition, body):
         super(McIfStatement, self).__init__(l)
-        self._condition, self._body = condition, body
-        if len(self._body) > 0:
-            self._final = [self.body[-1].init]
+        self.condition, self.body = condition, body
+        if len(self.body) > 0:
+            self.final = [self.body[-1].init]
 
     # Returns the nodes in the flow graph of the if statement.
     def flow(self):

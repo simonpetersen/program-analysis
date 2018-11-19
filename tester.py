@@ -1,22 +1,9 @@
 from analysis.analyzer import ReachingDefinitionsAnalyzer
 from analysis.worklist import WorklistChaotic
-from analysis.worklist import WorklistFifo
-from analysis.worklist import WorklistLifo
 import microc.expressions
 import microc.statements
 import microc.microc
 import microc.operations
-
-
-'''
-x := 5
-y := 1
-while (x > 1) {
-    y := x * y
-    x := x - 1
-}
-x := 0
-'''
 
 # Init variables
 x = microc.expressions.McVariable(1, "x")
