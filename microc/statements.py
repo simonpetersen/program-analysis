@@ -120,3 +120,8 @@ class McWriteStatement(McNode):
 
     def variables(self):
         return self.statement.variables()
+
+
+class McBreakStatement(McNode):
+    def __init__(self, l):
+        super(McBreakStatement, self).__init__(l)

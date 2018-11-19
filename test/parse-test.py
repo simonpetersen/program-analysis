@@ -2,10 +2,10 @@ import unittest
 from microc.parser import ParserMicroC
 
 
-class MCParser(unittest.TestCase):
+class MCParserTest(unittest.TestCase):
 
     def test(self):
-        file = open("microc.txt")
+        file = open("microc1.txt")
         program = file.read()
         mc_program = ParserMicroC(program).parse()
         file.close()

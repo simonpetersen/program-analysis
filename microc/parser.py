@@ -7,9 +7,17 @@ import microc.operations
 class ParserMicroC:
 
     def __init__(self, program):
-        self.lines = program.split("\n")
         self.tokens = program.split()
         self.l = 1
+        self.symbols = ['}', ']', ')']
+        self.removeCommentTokens()
+
+    def removeCommentTokens(self):
+        # Remove comments until no more /* is in tokens.
+        while '/*' in self.tokens:
+            comment_start = self.tokens.index('/*')
+            comment_end = self.tokens.index('*/')
+            self.tokens = self.tokens[:comment_start] + self.tokens[comment_end+1:]
 
     # Parse method, taking a micro-c program as string parameter.
     def parse(self):
@@ -26,9 +34,16 @@ class ParserMicroC:
             self.l += 1
             self.tokens.pop(0)
 
+    def incrementLineCounter(self):
+        self.l += 1
+
     def nextToken(self):
         self.checkForLineEnd()
-        return self.tokens.pop(0)
+        token = self.tokens.pop(0)
+        if token[-1] in self.symbols:
+            self.tokens.insert(0, token[-1])
+            return token[:-1]
+        return token
 
     # Checks if the next token is expected token.
     def mustBe(self, token):
@@ -66,16 +81,17 @@ class ParserMicroC:
         return variable
 
     def statement(self):
+        l = self.l
         if self.nextTokenIs('while'):
             return self.parseWhile()
         elif self.nextTokenIs('if'):
             return self.parseIf()
         elif self.nextTokenIs('read'):
             statement = self.statement()
-            return microc.statements.McReadStatement(self.l, statement)
+            return microc.statements.McReadStatement(l, statement)
         elif self.nextTokenIs('write'):
             statement = self.statement()
-            return microc.statements.McWriteStatement(self.l, statement)
+            return microc.statements.McWriteStatement(l, statement)
         else:
             return self.expression()
 
@@ -84,6 +100,7 @@ class ParserMicroC:
         self.mustBe('(')
         condition = self.expression()
         self.mustBe(')')
+        self.incrementLineCounter()
         body = self.block()
         return microc.statements.McWhileStatement(l, condition, body)
 
@@ -92,6 +109,7 @@ class ParserMicroC:
         self.mustBe('(')
         condition = self.expression()
         self.mustBe(')')
+        self.incrementLineCounter()
         body = self.block()
         if self.nextTokenIs('else'):
             else_body = self.block()
@@ -135,18 +153,18 @@ class ParserMicroC:
         elif self.nextTokenIs('!='):
             rhs = self.additiveExpression()
             return microc.operations.McNotEqualsOp(l, lhs, rhs)
-        elif self.nextTokenIs('>'):
-            rhs = self.additiveExpression()
-            return microc.operations.McGreaterOp(l, lhs, rhs)
         elif self.nextTokenIs('>='):
             rhs = self.additiveExpression()
             return microc.operations.McGreaterEqualsOp(l, lhs, rhs)
-        elif self.nextTokenIs('<'):
+        elif self.nextTokenIs('>'):
             rhs = self.additiveExpression()
-            return microc.operations.McLessOp(l, lhs, rhs)
+            return microc.operations.McGreaterOp(l, lhs, rhs)
         elif self.nextTokenIs('<='):
             rhs = self.additiveExpression()
             return microc.operations.McLessEqualsOp(l, lhs, rhs)
+        elif self.nextTokenIs('<'):
+            rhs = self.additiveExpression()
+            return microc.operations.McLessOp(l, lhs, rhs)
         return lhs
 
     def additiveExpression(self):
@@ -188,6 +206,7 @@ class ParserMicroC:
     def variable(self):
         l = self.l
         variable = self.getVariableName()
+        # Either variable or array declaration. int i or int[n] A
         if variable == 'int':
             if self.nextTokenIs('['):
                 value = self.parseValueLiteral()
@@ -196,7 +215,11 @@ class ParserMicroC:
                 return microc.expressions.McArrayDeclaration(l, variable, value)
             variable = self.getVariableName()
             return microc.expressions.McVariableDeclaration(l, variable)
+        # break statement
+        elif variable == 'break':
+            return microc.statements.McBreakStatement(l)
         elif not variable:
+            # Record declaration {int a, int b} R.
             if self.nextTokenIs('{'):
                 elements = []
                 while not self.nextTokenIs('}'):
@@ -208,6 +231,7 @@ class ParserMicroC:
                 return microc.expressions.McRecordDeclaration(l, variable, elements)
             # Must be value literal
             return self.parseValueLiteral()
+        # Record accessor R.a
         if self.nextTokenIs('.'):
             element = self.getVariableName()
             return microc.expressions.McRecordAccessor(l, variable, element)
