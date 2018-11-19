@@ -5,7 +5,7 @@ int[10] A;
 while (i<10) {
     read A[i]; i:=i+1;
 }
-i=0;
+i:=0;
 while (i<10) {
     if (A[i]>=0) { R.fst := R.fst+A[i]; i := i+1; }
     else { i := i+1; break; }  /* try also with continue */

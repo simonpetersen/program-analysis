@@ -14,7 +14,6 @@ class ParserMicroC:
     # Parse method, taking a micro-c program as string parameter.
     def parse(self):
         nodes = self.block()
-
         program = McProgram(nodes)
         return program
 
@@ -27,6 +26,10 @@ class ParserMicroC:
             self.l += 1
             self.tokens.pop(0)
 
+    def nextToken(self):
+        self.checkForLineEnd()
+        return self.tokens.pop(0)
+
     # Checks if the next token is expected token.
     def mustBe(self, token):
         self.checkForLineEnd()
@@ -36,15 +39,31 @@ class ParserMicroC:
 
     # Checks the next token, and only removes it, if it matches
     def nextTokenIs(self, token):
-        self.checkForLineEnd()
+        if token != ';':
+            self.checkForLineEnd()
         if self.tokens[0] == token:
             self.tokens.pop(0)
             return True
         if len(self.tokens[0]) >= len(token):
             if self.tokens[0][:len(token)] == token:
-                self.tokens[0] = self.tokens[len(token):]
+                self.tokens[0] = self.tokens[0][len(token):]
                 return True
         return False
+
+    def getVariableName(self):
+        variable = ""
+        i = 0
+        word = self.tokens[0]
+        while i < len(word):
+            c = word[i]
+            if c.isalpha():
+                variable += c
+                i += 1
+            else:
+                self.tokens[0] = word[i:]
+                return variable
+        self.tokens.pop(0)
+        return variable
 
     def statement(self):
         if self.nextTokenIs('while'):
@@ -61,21 +80,23 @@ class ParserMicroC:
             return self.expression()
 
     def parseWhile(self):
+        l = self.l
         self.mustBe('(')
         condition = self.expression()
         self.mustBe(')')
         body = self.block()
-        return microc.statements.McWhileStatement(self.l, condition, body)
+        return microc.statements.McWhileStatement(l, condition, body)
 
     def parseIf(self):
+        l = self.l
         self.mustBe('(')
         condition = self.expression()
         self.mustBe(')')
         body = self.block()
         if self.nextTokenIs('else'):
             else_body = self.block()
-            return microc.statements.McIfElseStatement(self.l, condition, body, else_body)
-        return microc.statements.McIfStatement(self.l, condition, body)
+            return microc.statements.McIfElseStatement(l, condition, body, else_body)
+        return microc.statements.McIfStatement(l, condition, body)
 
     # Returns a list of statements
     def block(self):
@@ -87,79 +108,119 @@ class ParserMicroC:
         return statements
 
     def expression(self):
+        l = self.l
         lhs = self.logicalExpression()
         if self.nextTokenIs(':='):
             rhs = self.logicalExpression()
-            return microc.statements.McAssignment(self.l, lhs, rhs)
+            return microc.statements.McAssignment(l, lhs, rhs)
         return lhs
 
     def logicalExpression(self):
+        l = self.l
         lhs = self.relationalExpression()
         if self.nextTokenIs('|'):
             rhs = self.relationalExpression()
-            return microc.operations.McLogicalOrOp(self.l, lhs, rhs)
+            return microc.operations.McLogicalOrOp(l, lhs, rhs)
         elif self.nextTokenIs('&'):
             rhs = self.relationalExpression()
-            return microc.operations.McLogicalAndOp(self.l, lhs, rhs)
+            return microc.operations.McLogicalAndOp(l, lhs, rhs)
         return lhs
 
     def relationalExpression(self):
+        l = self.l
         lhs = self.additiveExpression()
         if self.nextTokenIs('=='):
             rhs = self.additiveExpression()
-            return microc.operations.McEqualsOp(self.l, lhs, rhs)
+            return microc.operations.McEqualsOp(l, lhs, rhs)
         elif self.nextTokenIs('!='):
             rhs = self.additiveExpression()
-            return microc.operations.McNotEqualsOp(self.l, lhs, rhs)
+            return microc.operations.McNotEqualsOp(l, lhs, rhs)
         elif self.nextTokenIs('>'):
             rhs = self.additiveExpression()
-            return microc.operations.McGreaterOp(self.l, lhs, rhs)
+            return microc.operations.McGreaterOp(l, lhs, rhs)
         elif self.nextTokenIs('>='):
             rhs = self.additiveExpression()
-            return microc.operations.McGreaterEqualsOp(self.l, lhs, rhs)
+            return microc.operations.McGreaterEqualsOp(l, lhs, rhs)
         elif self.nextTokenIs('<'):
             rhs = self.additiveExpression()
-            return microc.operations.McLessOp(self.l, lhs, rhs)
+            return microc.operations.McLessOp(l, lhs, rhs)
         elif self.nextTokenIs('<='):
             rhs = self.additiveExpression()
-            return microc.operations.McLessEqualsOp(self.l, lhs, rhs)
+            return microc.operations.McLessEqualsOp(l, lhs, rhs)
         return lhs
 
     def additiveExpression(self):
+        l = self.l
         lhs = self.multiplicativeExpression()
         more = True
         while more:
             if self.nextTokenIs('+'):
-                lhs = microc.operations.McPlusOp(self.l, lhs, self.multiplicativeExpression())
+                lhs = microc.operations.McPlusOp(l, lhs, self.multiplicativeExpression())
             elif self.nextTokenIs('-'):
-                lhs = microc.operations.McMinusOp(self.l, lhs, self.multiplicativeExpression())
+                lhs = microc.operations.McMinusOp(l, lhs, self.multiplicativeExpression())
             else:
                 more = False
         return lhs
 
     def multiplicativeExpression(self):
+        l = self.l
         lhs = self.negateExpression()
         # Loop is needed, in case of a*b*c
         more = True
         while more:
             if self.nextTokenIs('*'):
-                lhs = microc.operations.McMultiplyOp(self.l, lhs, self.negateExpression())
+                lhs = microc.operations.McMultiplyOp(l, lhs, self.negateExpression())
             elif self.nextTokenIs('/'):
-                lhs = microc.operations.McDivisionOp(self.l, lhs, self.negateExpression())
+                lhs = microc.operations.McDivisionOp(l, lhs, self.negateExpression())
             elif self.nextTokenIs('%'):
-                lhs = microc.operations.McRemainderOp(self.l, lhs, self.negateExpression())
+                lhs = microc.operations.McRemainderOp(l, lhs, self.negateExpression())
             else:
                 more = False
         return lhs
 
     def negateExpression(self):
+        l = self.l
         if self.nextTokenIs('not'):
             expression = self.logicalExpression()
-            return microc.expressions.McNotExpression(self.l, expression)
+            return microc.expressions.McNotExpression(l, expression)
         return self.variable()
 
-    # TODO: Fix
     def variable(self):
-        token = self.tokens.pop(0)
-        return microc.expressions.McVariable(self.l, token)
+        l = self.l
+        variable = self.getVariableName()
+        if variable == 'int':
+            if self.nextTokenIs('['):
+                value = self.parseValueLiteral()
+                self.mustBe(']')
+                variable = self.getVariableName()
+                return microc.expressions.McArrayDeclaration(l, variable, value)
+            variable = self.getVariableName()
+            return microc.expressions.McVariableDeclaration(l, variable)
+        elif not variable:
+            if self.nextTokenIs('{'):
+                elements = []
+                while not self.nextTokenIs('}'):
+                    self.mustBe('int')
+                    variable = self.getVariableName()
+                    elements.append(variable)
+                    self.nextTokenIs(';')
+                variable = self.getVariableName()
+                return microc.expressions.McRecordDeclaration(l, variable, elements)
+            # Must be value literal
+            return self.parseValueLiteral()
+        if self.nextTokenIs('.'):
+            element = self.getVariableName()
+            return microc.expressions.McRecordAccessor(l, variable, element)
+        elif self.nextTokenIs('['):
+            accessor = self.getVariableName()
+            if not accessor:
+                # must be a integer literal as accessor.
+                accessor = self.nextToken()
+            self.mustBe(']')
+            return microc.expressions.McArrayAccessor(l, variable, accessor)
+        return microc.expressions.McVariable(l, variable)
 
+
+    def parseValueLiteral(self):
+        token = self.nextToken()
+        return microc.expressions.McValueLiteral(self.l, token)

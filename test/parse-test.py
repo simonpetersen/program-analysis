@@ -9,7 +9,7 @@ class MCParser(unittest.TestCase):
         program = file.read()
         mc_program = ParserMicroC(program).parse()
         file.close()
-        #self.assertEqual(len(mc_program.nodes), 7)
+        self.assertEqual(len(mc_program.nodes), 7)
         pass
 
 
