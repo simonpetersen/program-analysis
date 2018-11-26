@@ -1,14 +1,31 @@
 from microc.statements import McAssignment
+from microc.statements import McReadStatement
 from analysis.data import UnionConstraint
 from analysis.data import NodeInputSet
 from analysis.data import NodeInputKillGen
 
 
 class ReachingDefinitionsAnalyzer:
-    def assignments(self, nodes, assignments):
+
+    def analyze(self, program):
+        nodes = program.nodeList()
+        variables = program.variables()
+        flow = program.flow()
+        assignments = self.assignments(nodes)
+
+        self.setKillGenSets(nodes, assignments)
+        return self.constructConstraints(nodes, variables, flow)
+
+    # Returns the list of assignments in nodes of the program. Needed to define kill and gen sets.
+    def assignments(self, nodes):
+        assignments = set()
         for node in nodes:
             if type(node) is McAssignment:
-                assignments = assignments | {(node.lhs.variable, node.init)}
+                variables = node.lhs.variables()
+                assignments = assignments | set(map(lambda v: (v, node.init), variables))
+            elif type(node) is McReadStatement:
+                variables = node.variables()
+                assignments = assignments | set(map(lambda v: (v, node.init), variables))
 
         return assignments
 
@@ -16,12 +33,18 @@ class ReachingDefinitionsAnalyzer:
         for node in nodes:
             # Find kill and gen
             if type(node) is McAssignment:
-                variable = node.lhs.variable
-                kill = set(filter(lambda a: variable == a[0], assignments)) | {(variable, '?')}
-                gen = {(variable, node.init)}
-                node.kill, node.gen = kill, gen
+                # Lhs of assignment will be variable, record or array. Handled by the variables-method,
+                # which returns set of variables in expression.
+                variables = node.lhs.variables()
+                self.setNodeKillGen(node, variables, assignments)
+            elif type(node) is McReadStatement:
+                variables = node.variables()
+                self.setNodeKillGen(node, variables, assignments)
 
-        return nodes
+    def setNodeKillGen(self, node, variables, assignments):
+        kill = set(filter(lambda a: a[0] in variables, assignments)) | set(map(lambda v: (v, '?'), variables))
+        gen = set(map(lambda v: (v, node.init), variables))
+        node.kill, node.gen = kill, gen
 
     def constructConstraints(self, nodes, variables, flow):
         constraints = []
@@ -42,12 +65,3 @@ class ReachingDefinitionsAnalyzer:
                 constraints.append(c)
 
         return constraints
-
-    def analyze(self, program):
-        nodes = program.nodeList()
-        variables = program.variables()
-        flow = program.flow()
-        assignments = self.assignments(nodes, set())
-
-        nodes = self.setKillGenSets(nodes, assignments)
-        return self.constructConstraints(nodes, variables, flow)
