@@ -1,3 +1,4 @@
+from microc.microc import McDeclaration
 from microc.statements import McAssignment
 from microc.statements import McReadStatement
 from microc.statements import McIfStatement
@@ -9,6 +10,7 @@ from microc.operations import McPlusOp
 from microc.operations import McMultiplyOp
 from microc.operations import McRemainderOp
 from microc.expressions import McValueLiteral
+from microc.expressions import McArrayDeclaration
 from analysis.data import UnionConstraint
 from analysis.data import NodeInputSet
 from analysis.data import NodeInputKillGen
@@ -73,7 +75,7 @@ class ReachingDefinitionsAnalyzer(BitVectorAnalyserBase):
             if type(node) is McAssignment:
                 variables = node.lhs.variables()
                 assignments = assignments | set(map(lambda v: (v, node.init), variables))
-            elif type(node) is McReadStatement:
+            elif type(node) is McReadStatement or type(node) is McDeclaration:
                 variables = node.variables()
                 assignments = assignments | set(map(lambda v: (v, node.init), variables))
 
@@ -87,7 +89,7 @@ class ReachingDefinitionsAnalyzer(BitVectorAnalyserBase):
                 # which returns set of variables in expression.
                 variables = node.lhs.variables()
                 self.setNodeKillGen(node, variables, self.assigns)
-            elif type(node) is McReadStatement:
+            elif type(node) is McReadStatement or type(node) is McDeclaration:
                 variables = node.variables()
                 self.setNodeKillGen(node, variables, self.assigns)
 
@@ -112,10 +114,13 @@ class LiveVariablesAnalyser(BitVectorAnalyserBase):
                 # which returns set of variables in expression.
                 node.kill = node.lhs.variables()
                 node.gen = node.rhs.variables()
-            elif type(node) is McReadStatement:
-                node.kill = node.variables()
             elif type(node) is McWhileStatement or type(node) is McIfStatement or type(node) is McIfElseStatement:
                 node.gen = node.condition.variables()
+            elif type(node) is McArrayDeclaration:
+                node.gen = node.size.variables()
+                node.kill = node.variables()
+            elif type(node) is McReadStatement or type(node) is McDeclaration:
+                node.kill = node.variables()
             else:
                 node.gen = node.variables()
 
