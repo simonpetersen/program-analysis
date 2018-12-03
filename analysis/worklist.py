@@ -1,6 +1,16 @@
-class WorklistBase:
+from abc import ABC, abstractmethod
+
+class WorklistBase(ABC):
     def __init__(self):
         self.empty = []
+
+    @abstractmethod
+    def insert(self, c, w):
+        pass
+
+    @abstractmethod
+    def extract(self, w):
+        pass
 
     def computeSolution(self, constraints):
         w, analysis, infl = [], [], []

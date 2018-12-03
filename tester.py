@@ -1,5 +1,5 @@
-from analysis.analyzer import ReachingDefinitionsAnalyzer
-from analysis.analyzer import DetectingSignsAnalyser
+from analysis.analyser import ReachingDefinitionsAnalyzer
+from analysis.analyser import DetectingSignsAnalyser
 from analysis.worklist import WorklistChaotic
 import microc.expressions
 import microc.statements

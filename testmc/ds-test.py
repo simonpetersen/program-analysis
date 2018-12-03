@@ -1,5 +1,5 @@
 import unittest
-from analysis.analyzer import DetectingSignsAnalyser
+from analysis.analyser import DetectingSignsAnalyser
 from testmc.util import TestBase
 
 
@@ -8,8 +8,8 @@ class DetectionOfSignsTest(TestBase):
         program = self.load("../test-files/base.txt")
         initialSigns = {'x': ['+','0','-'], 'y': ['+','0','-']}
         expected_variables = {'x','y'}
-        analyzer = DetectingSignsAnalyser()
-        nodeSigns = analyzer.analyze(program, initialSigns)
+        analyzer = DetectingSignsAnalyser(program, initialSigns)
+        nodeSigns = analyzer.analyze()
         expected_signs = []
         expected_signs.append([0, {'x': ['+', '0', '-'], 'y': ['+', '0', '-']}])
         expected_signs.append([1, {'x': ['+'], 'y': ['+', '0', '-']}])

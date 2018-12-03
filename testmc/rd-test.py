@@ -1,5 +1,5 @@
 import unittest
-from analysis.analyzer import ReachingDefinitionsAnalyzer
+from analysis.analyser import ReachingDefinitionsAnalyzer
 from analysis.worklist import WorklistChaotic
 from testmc.util import TestBase
 

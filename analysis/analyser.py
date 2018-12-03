@@ -1,8 +1,5 @@
 from microc.statements import McAssignment
 from microc.statements import McReadStatement
-from microc.statements import McWhileStatement
-from microc.statements import McIfStatement
-from microc.statements import McIfElseStatement
 from microc.statements import McIfStatement
 from microc.statements import McIfElseStatement
 from microc.statements import McWhileStatement
@@ -12,21 +9,29 @@ from microc.operations import McPlusOp
 from microc.operations import McMultiplyOp
 from microc.operations import McRemainderOp
 from microc.expressions import McValueLiteral
-from microc.expressions import McVariable
 from analysis.data import UnionConstraint
 from analysis.data import NodeInputSet
 from analysis.data import NodeInputKillGen
 from abc import ABC, abstractmethod
 
 
-class BitVectorAnalyzerBase(ABC):
+class AnalyserBase(ABC):
     def __init__(self, program):
         self.nodes = program.nodeList()
+
+    @abstractmethod
+    def analyse(self):
+        pass
+
+
+class BitVectorAnalyserBase(AnalyserBase):
+    def __init__(self, program):
+        super(BitVectorAnalyserBase, self).__init__(program)
         self.flow = program.flow()
         self.base_case = [1]
         self.base_set = set()
 
-    def analyze(self):
+    def analyse(self):
         self.setKillGenSets(self.nodes)
         return self.nodes, self.constructConstraints(self.nodes)
 
@@ -54,7 +59,7 @@ class BitVectorAnalyzerBase(ABC):
         return constraints
 
 
-class ReachingDefinitionsAnalyzer(BitVectorAnalyzerBase):
+class ReachingDefinitionsAnalyzer(BitVectorAnalyserBase):
 
     def __init__(self, program):
         super(ReachingDefinitionsAnalyzer, self).__init__(program)
@@ -92,9 +97,9 @@ class ReachingDefinitionsAnalyzer(BitVectorAnalyzerBase):
         node.kill, node.gen = kill, gen
 
 
-class LiveVariablesAnalyzer(BitVectorAnalyzerBase):
+class LiveVariablesAnalyser(BitVectorAnalyserBase):
     def __init__(self, program):
-        super(LiveVariablesAnalyzer, self).__init__(program)
+        super(LiveVariablesAnalyser, self).__init__(program)
         self.flow = set(map(lambda f: (f[1], f[0]), program.flow()))
         self.base_case = [len(self.nodes)]
         self.base_set = set()
@@ -115,17 +120,20 @@ class LiveVariablesAnalyzer(BitVectorAnalyzerBase):
                 node.gen = node.variables()
 
 
-class DetectingSignsAnalyser:
+class DetectingSignsAnalyser(AnalyserBase):
+    def __init__(self, program, initialSigns):
+        super(DetectingSignsAnalyser, self).__init__(program)
+        self.initialSigns = initialSigns
 
     #Check for possible flows that enter the current node
 
-    def signsDetection(self, nodes, initialSigns):
+    def analyse(self):
         #Typer assignment + read + if + while
         signs = []
-        initial = initialSigns
+        initial = self.initialSigns
         count = 0
         signs.append([count, initial])
-        for node in nodes:
+        for node in self.nodes:
             current = {}
             count += 1
             #ASSIGNMENT
@@ -269,11 +277,3 @@ class DetectingSignsAnalyser:
             #current.sort
             signs.append([count, current])
         return signs
-
-    #Function that detects the sign of a variable 
-
-    #Function that calculates the sign of an operation
-    
-    def analyze(self, program, initialSigns):
-        nodes = program.nodeList()
-        return self.signsDetection(nodes, initialSigns)

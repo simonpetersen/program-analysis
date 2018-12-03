@@ -1,5 +1,5 @@
 import unittest
-from analysis.analyzer import LiveVariablesAnalyzer
+from analysis.analyser import LiveVariablesAnalyzer
 from analysis.worklist import WorklistChaotic
 from testmc.util import TestBase
 
