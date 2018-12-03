@@ -252,12 +252,15 @@ class DetectingSignsAnalyser:
                 current[lhsVariable] = ['+','0','-']
             #IF    
             elif type(node) == McIfStatement:
+                lhsVariable = node.condition.lhs.variables().pop()
                 current[lhsVariable] = ['+','0','-']
             #IFELSE  
             elif type(node) == McIfElseStatement:
+                lhsVariable = node.condition.lhs.variables().pop()
                 current[lhsVariable] = ['+','0','-']
             #WHILE
             elif type(node) == McWhileStatement:
+                lhsVariable = node.condition.lhs.variables().pop()
                 current[lhsVariable] = ['+','0','-']
             #INSERTION OF PREVIOUS SIGNS    
             for i in signs[count-1][1]:
