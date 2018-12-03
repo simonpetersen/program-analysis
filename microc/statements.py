@@ -73,14 +73,14 @@ class McIfElseStatement(McNode):
     def flow(self):
         s = set()
         if len(self.thenBody) > 0:
-            s = s |{(self.l, self.thenBody[0].init)}
+            s = s |{(self.init, self.thenBody[0].init)}
             for i in range(0, len(self.thenBody) - 1):
                 for l in self.thenBody[i].final:
                     s = s | {(l, self.thenBody[i + 1].init)}
                 s = s | self.thenBody[i].flow()
 
         if len(self.elseBody) > 0:
-            s = s |{(self.l, self.elseBody[0].init)}
+            s = s |{(self.init, self.elseBody[0].init)}
             for i in range(0, len(self.elseBody) - 1):
                 for l in self.elseBody[i].final:
                     s = s | {(l, self.elseBody[i + 1].init)}

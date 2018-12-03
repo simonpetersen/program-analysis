@@ -11,15 +11,8 @@ from microc.statements import McIfStatement
 
 class MCParserTest(unittest.TestCase):
 
-    def load(self, path):
-        file = open(path)
-        program = file.read()
-        mc_program = ParserMicroC(program).parse()
-        file.close()
-        return mc_program
-
     def testParseBase(self):
-        program = self.load("../test-files/base.txt")
+        program = self.load("../testmc-files/base.txt")
         self.assertEqual(len(program.nodes), 4)
         self.assertTrue(type(program.nodes[0]) is McAssignment)
         self.assertTrue(type(program.nodes[1]) is McAssignment)
@@ -27,7 +20,7 @@ class MCParserTest(unittest.TestCase):
         self.assertTrue(type(program.nodes[3]) is McAssignment)
 
     def testParseMicroC1(self):
-        program = self.load("../test-files/microc1.txt")
+        program = self.load("../testmc-files/microc1.txt")
         self.assertEqual(len(program.nodes), 7)
         self.assertTrue(type(program.nodes[0]) is McVariableDeclaration)
         self.assertTrue(type(program.nodes[1]) is McRecordDeclaration)
@@ -38,9 +31,10 @@ class MCParserTest(unittest.TestCase):
         self.assertTrue(type(program.nodes[6]) is McWriteStatement)
 
     def testParseMicroC2(self):
-        program = self.load("../test-files/microc2.txt")
+        program = self.load("../testmc-files/microc2.txt")
         self.assertEqual(len(program.nodes), 3)
         self.assertTrue(type(program.nodes[2]) is McIfStatement)
+
 
 if __name__ == '__main__':
     unittest.main()

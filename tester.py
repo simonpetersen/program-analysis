@@ -1,4 +1,4 @@
-from analysis.analyzer import ReachingDefinitionsAnalyzer
+from analysis.analyzer import ReachingDefinitionsBitVectorAnalyzer
 from analysis.worklist import WorklistChaotic
 import microc.expressions
 import microc.statements
@@ -21,7 +21,7 @@ nodes.append(microc.statements.McAssignment(6, x, microc.expressions.McValueLite
 
 program = microc.microc.McProgram(nodes)
 
-analyzer = ReachingDefinitionsAnalyzer()
+analyzer = ReachingDefinitionsBitVectorAnalyzer()
 constraints = analyzer.analyze(program)
 
 wl = WorklistChaotic()
