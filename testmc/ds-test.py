@@ -9,7 +9,7 @@ class DetectionOfSignsTest(TestBase):
         initialSigns = {'x': ['+','0','-'], 'y': ['+','0','-']}
         expected_variables = {'x','y'}
         analyzer = DetectingSignsAnalyser(program, initialSigns)
-        nodeSigns = analyzer.analyze()
+        nodeSigns = analyzer.analyse()
         expected_signs = []
         expected_signs.append([0, {'x': ['+', '0', '-'], 'y': ['+', '0', '-']}])
         expected_signs.append([1, {'x': ['+'], 'y': ['+', '0', '-']}])

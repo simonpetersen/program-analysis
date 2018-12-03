@@ -1,5 +1,5 @@
 import unittest
-from analysis.analyser import LiveVariablesAnalyzer
+from analysis.analyser import LiveVariablesAnalyser
 from analysis.worklist import WorklistChaotic
 from testmc.util import TestBase
 
@@ -8,8 +8,8 @@ class TestReachingDefinitions(TestBase):
 
     def testLiveVariables(self):
         program = self.load("../test-files/base2.txt")
-        analyzer = LiveVariablesAnalyzer(program)
-        nodes, constraints = analyzer.analyze()
+        analyzer = LiveVariablesAnalyser(program)
+        nodes, constraints = analyzer.analyse()
         worklist = WorklistChaotic()
         input = worklist.computeSolution(constraints)
         output = []

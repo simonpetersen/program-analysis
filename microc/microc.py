@@ -34,7 +34,7 @@ class McProgram:
         return node_list
 
 
-class McNode:
+class McExpression:
     def __init__(self, l):
         self.init, self.final = l, [l]
         # Init kill and gen as empty sets
@@ -47,7 +47,7 @@ class McNode:
         return set()
 
 
-class McBinaryExpression(McNode):
+class McBinaryExpression(McExpression):
     def __init__(self, l, lhs, rhs):
         super(McBinaryExpression, self).__init__(l)
         self.lhs, self.rhs = lhs, rhs
@@ -56,6 +56,11 @@ class McBinaryExpression(McNode):
         return self.lhs.variables() | self.rhs.variables()
 
 
-class McStatement(McNode):
+class McStatement(McExpression):
     def __init__(self, l):
         super(McStatement, self).__init__(l)
+
+
+class McDeclaration(McExpression):
+    def __init__(self, l):
+        super(McDeclaration, self).__init__(l)

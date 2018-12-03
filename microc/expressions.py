@@ -1,7 +1,8 @@
-from microc.microc import McNode
+from microc.microc import McExpression
+from microc.microc import McDeclaration
 
 
-class McVariableDeclaration(McNode):
+class McVariableDeclaration(McDeclaration):
     def __init__(self, l, variable):
         super(McVariableDeclaration, self).__init__(l)
         self.variable = variable
@@ -10,7 +11,7 @@ class McVariableDeclaration(McNode):
         return set(self.variable)
 
 
-class McVariable(McNode):
+class McVariable(McExpression):
     def __init__(self, l, variable):
         super(McVariable, self).__init__(l)
         self.variable = variable
@@ -19,7 +20,7 @@ class McVariable(McNode):
         return set(self.variable)
 
 
-class McArrayDeclaration(McNode):
+class McArrayDeclaration(McDeclaration):
     def __init__(self, l, variable, size):
         super(McArrayDeclaration, self).__init__(l)
         self.variable, self.size = variable, size
@@ -28,7 +29,7 @@ class McArrayDeclaration(McNode):
         return set(self.variable)
 
 
-class McArrayAccessor(McNode):
+class McArrayAccessor(McExpression):
     def __init__(self, l, array, index):
         super(McArrayAccessor, self).__init__(l)
         self.array, self.index = array, index
@@ -37,7 +38,7 @@ class McArrayAccessor(McNode):
         return set(self.array)
 
 
-class McRecordDeclaration(McNode):
+class McRecordDeclaration(McDeclaration):
     def __init__(self, l, record, elements):
         super(McRecordDeclaration, self).__init__(l)
         self.record, self.elements = record, elements
@@ -46,7 +47,7 @@ class McRecordDeclaration(McNode):
         return set(self.record)
 
 
-class McRecordAccessor(McNode):
+class McRecordAccessor(McExpression):
     def __init__(self, l, record, element):
         super(McRecordAccessor, self).__init__(l)
         self.record, self.element = record, element
@@ -56,7 +57,7 @@ class McRecordAccessor(McNode):
         return set(self.record)
 
 
-class McValueLiteral(McNode):
+class McValueLiteral(McExpression):
     def __init__(self, l, value):
         super(McValueLiteral, self).__init__(l)
         self.value = value

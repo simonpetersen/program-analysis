@@ -1,5 +1,5 @@
 from microc.microc import McBinaryExpression
-from microc.microc import McNode
+from microc.microc import McExpression
 
 
 class McPlusOp(McBinaryExpression):
@@ -76,7 +76,7 @@ class McLogicalAndOp(McBinaryExpression):
 
 
 # Operation: not b
-class McNotExpression(McNode):
+class McNotExpression(McExpression):
     def __index__(self, l, expression):
         super(McNotExpression, self).__init__(l)
         self.expression = expression

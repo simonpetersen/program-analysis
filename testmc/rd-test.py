@@ -9,7 +9,7 @@ class TestReachingDefinitions(TestBase):
     def testAnalyzer(self):
         program = self.load("../test-files/base.txt")
         analyzer = ReachingDefinitionsAnalyzer(program)
-        nodes, constraints = analyzer.analyze()
+        nodes, constraints = analyzer.analyse()
         expected_variables = {"x", "y"}
         self.assertEqual(program.variables(), expected_variables)
         nodes = program.nodeList()
