@@ -274,6 +274,6 @@ class DetectingSignsAnalyser:
 
     #Function that calculates the sign of an operation
     
-    def analyse(self, program, initialSigns):
+    def analyze(self, program, initialSigns):
         nodes = program.nodeList()
         return self.signsDetection(nodes, initialSigns)
