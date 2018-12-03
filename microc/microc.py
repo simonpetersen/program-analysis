@@ -54,3 +54,8 @@ class McBinaryExpression(McNode):
 
     def variables(self):
         return self.lhs.variables() | self.rhs.variables()
+
+
+class McStatement(McNode):
+    def __init__(self, l):
+        super(McStatement, self).__init__(l)

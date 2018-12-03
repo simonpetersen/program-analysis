@@ -1,8 +1,8 @@
-from microc.microc import McNode
+from microc.microc import McStatement
 from microc.microc import McBinaryExpression
 
 
-class McWhileStatement(McNode):
+class McWhileStatement(McStatement):
     def __init__(self, l, condition, body):
         super(McWhileStatement, self).__init__(l)
         self.condition, self.body = condition, body
@@ -32,7 +32,7 @@ class McWhileStatement(McNode):
         return s
 
 
-class McIfStatement(McNode):
+class McIfStatement(McStatement):
     def __init__(self, l, condition, body):
         super(McIfStatement, self).__init__(l)
         self.condition, self.body = condition, body
@@ -60,7 +60,7 @@ class McIfStatement(McNode):
         return s
 
 
-class McIfElseStatement(McNode):
+class McIfElseStatement(McStatement):
     def __init__(self, l, condition, thenBody, elseBody):
         super(McIfElseStatement, self).__init__(l)
         self.condition, self.thenBody, self.elseBody, self.body = condition, thenBody, elseBody, thenBody + elseBody
@@ -104,7 +104,7 @@ class McAssignment(McBinaryExpression):
         super(McAssignment, self).__init__(l, lhs, rhs)
 
 
-class McReadStatement(McNode):
+class McReadStatement(McStatement):
     def __init__(self, l, variable):
         super(McReadStatement, self).__init__(l)
         self.variable = variable
@@ -113,7 +113,7 @@ class McReadStatement(McNode):
         return self.variable.variables()
 
 
-class McWriteStatement(McNode):
+class McWriteStatement(McStatement):
     def __init__(self, l, statement):
         super(McWriteStatement, self).__init__(l)
         self.statement = statement
@@ -122,6 +122,6 @@ class McWriteStatement(McNode):
         return self.statement.variables()
 
 
-class McBreakStatement(McNode):
+class McBreakStatement(McStatement):
     def __init__(self, l):
         super(McBreakStatement, self).__init__(l)
