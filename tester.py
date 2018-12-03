@@ -1,4 +1,5 @@
-from analysis.analyzer import ReachingDefinitionsBitVectorAnalyzer
+from analysis.analyzer import ReachingDefinitionsAnalyzer
+from analysis.analyzer import DetectingSignsAnalyser
 from analysis.worklist import WorklistChaotic
 import microc.expressions
 import microc.statements
@@ -17,15 +18,23 @@ x_assignment = microc.statements.McAssignment(5, x, microc.operations.McMinusOp(
 # Append while-statement
 nodes.append(microc.statements.McWhileStatement(3, condition, [y_assignment, x_assignment]))
 # Append finale assignment to x
-nodes.append(microc.statements.McAssignment(6, x, microc.expressions.McValueLiteral(6, "1")))
+nodes.append(microc.statements.McAssignment(6, x, microc.expressions.McValueLiteral(6, "0")))
 
 program = microc.microc.McProgram(nodes)
 
-analyzer = ReachingDefinitionsBitVectorAnalyzer()
+analyzer = ReachingDefinitionsAnalyzer()
 constraints = analyzer.analyze(program)
+
+detecter = DetectingSignsAnalyser()
+initialSigns = {'x': ['+','0','-'], 'y': ['+','0','-']}
+signs = detecter.analyse(program, initialSigns)
+
+for s in signs:
+    print(s)
 
 wl = WorklistChaotic()
 solution = wl.computeSolution(constraints)
-
+'''
 for s in solution:
     print(s)
+'''
