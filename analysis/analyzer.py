@@ -119,7 +119,7 @@ class DetectingSignsAnalyser:
 
     #Check for possible flows that enter the current node
 
-    def assignments(self, nodes, initialSigns):
+    def signsDetection(self, nodes, initialSigns):
         #Typer assignment + read + if + while
         signs = []
         initial = initialSigns
@@ -184,7 +184,7 @@ class DetectingSignsAnalyser:
                     else: 
                         current[node.lhs] = ['+','0','-']
 
-                #MULTIPLICATION todo
+                #MULTIPLICATION
                 elif rhsType == McMultiplyOp:
                     multiOp = node.rhs
                     OpLhsType = type(multiOp.lhs)
@@ -210,7 +210,7 @@ class DetectingSignsAnalyser:
                         current[lhsVariable] = list (set(signs[count-1][1][multiOp.lhs.variables().pop()]) & set(signs[count-1][1][multiOp.rhs.variables().pop()]))
                     else:
                         current[node.lhs] = signs[count-1][1][node.lhs]
-                #DIVISION    todo
+                #DIVISION
                 elif rhsType == McDivisionOp:
                     diviOp = node.rhs
                     OpLhsType = type(diviOp.lhs)
@@ -236,10 +236,10 @@ class DetectingSignsAnalyser:
                         current[lhsVariable] = list(set(signs[count-1][1][diviOp.lhs.variables().pop()]) & set(signs[count-1][1][diviOp.rhs.variables().pop()]))
                     else:
                         current[lhsVariable] = signs[count-1][1][node.lhs]
-                #REMAINDER    todo
+                #REMAINDER  
                 elif rhsType == McRemainderOp:
                     current[lhsVariable] = ['+','0']
-                #LITERAL    todo
+                #LITERAL    
                 elif rhsType == McValueLiteral:
                     if int(node.rhs.value) > 0:
                         current[lhsVariable] = ['+']
@@ -247,13 +247,13 @@ class DetectingSignsAnalyser:
                         current[lhsVariable] = ['0']
                     else:
                         current[lhsVariable] = ['-']
-            #READ todo
+            #READ 
             elif type(node) == McReadStatement:
                 current[lhsVariable] = ['+','0','-']
-            #IF   todo 
+            #IF    
             elif type(node) == McIfStatement:
                 current[lhsVariable] = ['+','0','-']
-            #IFELSE  todo
+            #IFELSE  
             elif type(node) == McIfElseStatement:
                 current[lhsVariable] = ['+','0','-']
             #WHILE
@@ -273,4 +273,4 @@ class DetectingSignsAnalyser:
     
     def analyse(self, program, initialSigns):
         nodes = program.nodeList()
-        return self.assignments(nodes, initialSigns)
+        return self.signsDetection(nodes, initialSigns)
