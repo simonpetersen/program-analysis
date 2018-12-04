@@ -1,8 +1,9 @@
 {
+int z;
 x := 2;
-z := 5;
 if (x > 0) {
-  if (z == 0) {
+  read z;
+  if (z < 10) {
     write x;
   }
 }

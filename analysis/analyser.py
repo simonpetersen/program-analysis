@@ -75,7 +75,7 @@ class ReachingDefinitionsAnalyzer(BitVectorAnalyserBase):
             if type(node) is McAssignment:
                 variables = node.lhs.variables()
                 assignments = assignments | set(map(lambda v: (v, node.init), variables))
-            elif type(node) is McReadStatement or type(node) is McDeclaration:
+            elif type(node) is McReadStatement or issubclass(type(node), McDeclaration):
                 variables = node.variables()
                 assignments = assignments | set(map(lambda v: (v, node.init), variables))
 
@@ -89,7 +89,7 @@ class ReachingDefinitionsAnalyzer(BitVectorAnalyserBase):
                 # which returns set of variables in expression.
                 variables = node.lhs.variables()
                 self.setNodeKillGen(node, variables, self.assigns)
-            elif type(node) is McReadStatement or type(node) is McDeclaration:
+            elif type(node) is McReadStatement or issubclass(type(node), McDeclaration):
                 variables = node.variables()
                 self.setNodeKillGen(node, variables, self.assigns)
 
@@ -119,7 +119,7 @@ class LiveVariablesAnalyser(BitVectorAnalyserBase):
             elif type(node) is McArrayDeclaration:
                 node.gen = node.size.variables()
                 node.kill = node.variables()
-            elif type(node) is McReadStatement or type(node) is McDeclaration:
+            elif type(node) is McReadStatement or issubclass(type(node), McDeclaration):
                 node.kill = node.variables()
             else:
                 node.gen = node.variables()
