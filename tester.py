@@ -22,12 +22,12 @@ nodes.append(microc.statements.McAssignment(6, x, microc.expressions.McValueLite
 
 program = microc.microc.McProgram(nodes)
 
-analyzer = ReachingDefinitionsAnalyzer()
-constraints = analyzer.analyze(program)
+analyzer = ReachingDefinitionsAnalyzer(program)
+nodes, constraints = analyzer.analyse()
 
-detecter = DetectingSignsAnalyser()
 initialSigns = {'x': ['+','0','-'], 'y': ['+','0','-']}
-signs = detecter.analyse(program, initialSigns)
+detecter = DetectingSignsAnalyser(program, initialSigns)
+signs = detecter.analyse()
 
 for s in signs:
     print(s)
